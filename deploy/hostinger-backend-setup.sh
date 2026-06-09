@@ -2,7 +2,7 @@
 set -euo pipefail
 
 APP_DIR="${1:-/var/www/menu-paradise-api}"
-API_PUBLIC_URL="${2:-http://148.230.125.221}"
+API_PUBLIC_URL="${2:-http://148.230.125.221:3304}"
 FRONT_ORIGIN="${3:-https://www.example.com}"
 APP_PORT="${4:-3304}"
 API_SERVER_NAME="${API_PUBLIC_URL#http://}"
@@ -37,9 +37,9 @@ npm ci
 
 if [ ! -f .env ]; then
   cp deploy/backend.env.example .env
-  sed -i "s|PORT=3304|PORT=$APP_PORT|" .env
-  sed -i "s|API_BASE_URL=https://api.example.com|API_BASE_URL=$API_PUBLIC_URL|" .env
-  sed -i "s|CLIENT_ORIGIN=https://www.example.com|CLIENT_ORIGIN=$FRONT_ORIGIN|" .env
+  sed -i "s|^PORT=.*|PORT=$APP_PORT|" .env
+  sed -i "s|^API_BASE_URL=.*|API_BASE_URL=$API_PUBLIC_URL|" .env
+  sed -i "s|^CLIENT_ORIGIN=.*|CLIENT_ORIGIN=$FRONT_ORIGIN|" .env
   echo "Created $APP_DIR/.env. Edit DB_PASSWORD, JWT_SECRET, ADMIN_PASSWORD, and domain values before production use."
 fi
 

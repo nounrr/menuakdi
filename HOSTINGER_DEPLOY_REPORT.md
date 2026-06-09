@@ -19,7 +19,7 @@
 - `deploy/deploy-to-vps-148.230.125.221.bat`: script Windows pour envoyer le projet au VPS `root@148.230.125.221` et lancer le backend.
 - `deploy/backend.env.vps-148.230.125.221.example`: exemple `.env` deja adapte a l'IP du VPS.
 - `deploy/nginx-api-148.230.125.221.conf`: config Nginx adaptee a l'IP du VPS.
-- `deploy/build-front-dist-vps-ip.bat`: build front avec API `http://148.230.125.221/api`.
+- `deploy/build-front-dist-vps-ip.bat`: build front avec `VITE_API_BASE_URL=148.230.125.221:3304`.
 
 ## VPS cible
 
@@ -27,16 +27,16 @@
 ssh root@148.230.125.221
 ```
 
-API publique temporaire sans domaine:
+API publique directe sur le port backend:
 
 ```text
-http://148.230.125.221/api
+http://148.230.125.221:3304/api
 ```
 
 Health check:
 
 ```text
-http://148.230.125.221/api/health
+http://148.230.125.221:3304/api/health
 ```
 
 ## 1. Cloner le projet sur le VPS
@@ -92,7 +92,7 @@ curl http://api.votre-domaine.com/api/health
 Pour le VPS actuel avec IP seulement:
 
 ```bash
-sudo bash deploy/hostinger-backend-setup.sh /var/www/menu-paradise-api http://148.230.125.221 https://www.votre-front.com 3304
+sudo bash deploy/hostinger-backend-setup.sh /var/www/menu-paradise-api http://148.230.125.221:3304 https://akdigital.ma/assabahcafe 3304
 ```
 
 Si le front n'a pas encore de domaine et sert seulement pour test, remplacer `https://www.votre-front.com` par l'URL exacte du front quand elle existe.
@@ -129,7 +129,7 @@ Uploader le contenu de `deploy\front-dist` dans le nouvel hebergement Hostinger 
 ## 5. Points a verifier
 
 - Le domaine front doit etre identique a `CLIENT_ORIGIN`.
-- `VITE_API_BASE_URL` doit pointer vers `https://api.votre-domaine.com/api`.
+- `VITE_API_BASE_URL` peut etre `148.230.125.221:3304`; le front ajoute automatiquement `http://` et `/api`.
 - Les images upload sont servies par `https://api.votre-domaine.com/uploads/...`.
 - MySQL sur Hostinger VPS utilise souvent `DB_PORT=3306`, pas `3307`.
 - Le port `3304` est seulement interne backend; Nginx expose en public sur `80/443`.

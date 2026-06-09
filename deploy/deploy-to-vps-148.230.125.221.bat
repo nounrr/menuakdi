@@ -4,7 +4,7 @@ setlocal
 set VPS_HOST=148.230.125.221
 set VPS_USER=root
 set APP_DIR=/var/www/menu-paradise-api
-set API_PUBLIC_URL=http://148.230.125.221
+set API_PUBLIC_URL=http://148.230.125.221:3304
 set FRONT_ORIGIN=%1
 if "%FRONT_ORIGIN%"=="" set FRONT_ORIGIN=https://www.example.com
 

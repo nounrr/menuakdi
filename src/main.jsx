@@ -19,7 +19,13 @@ import {
 import './styles.css';
 import logoUrl from '../logo.png';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+function normalizeApiBaseUrl(value) {
+  const trimmed = String(value || 'http://localhost:5000/api').trim().replace(/\/+$/, '');
+  const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `http://${trimmed}`;
+  return /\/api$/i.test(withProtocol) ? withProtocol : `${withProtocol}/api`;
+}
+
+const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 const BACKEND_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '');
 const PAGE_SIZE = 20;
 const DEFAULT_META = { categories: [], subcategories: [] };
