@@ -11,7 +11,7 @@ import { upload } from './upload.js';
 dotenv.config();
 
 const app = express();
-const port = Number(process.env.PORT || 5000);
+const port = Number(3305 || 5000);
 const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 100;
 
