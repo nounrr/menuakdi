@@ -1,6 +1,6 @@
 @echo off
 setlocal
 
-call deploy\build-front-dist.bat 148.230.125.221:3304
+call deploy\build-front-dist.bat http://148.230.125.221:3304
 
 endlocal

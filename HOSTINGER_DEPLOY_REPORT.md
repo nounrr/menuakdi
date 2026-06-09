@@ -19,7 +19,9 @@
 - `deploy/deploy-to-vps-148.230.125.221.bat`: script Windows pour envoyer le projet au VPS `root@148.230.125.221` et lancer le backend.
 - `deploy/backend.env.vps-148.230.125.221.example`: exemple `.env` deja adapte a l'IP du VPS.
 - `deploy/nginx-api-148.230.125.221.conf`: config Nginx adaptee a l'IP du VPS.
-- `deploy/build-front-dist-vps-ip.bat`: build front avec `VITE_API_BASE_URL=148.230.125.221:3304`.
+- `deploy/build-front-dist-vps-ip.bat`: build front avec `VITE_API_BASE_URL=http://148.230.125.221:3304`.
+- `deploy/build-front-dist-https-api.bat`: build front avec un domaine API HTTPS.
+- `deploy/nginx-api-https-template.conf`: exemple Nginx HTTPS pour backend API.
 
 ## VPS cible
 
@@ -129,7 +131,7 @@ Uploader le contenu de `deploy\front-dist` dans le nouvel hebergement Hostinger 
 ## 5. Points a verifier
 
 - Le domaine front doit etre identique a `CLIENT_ORIGIN`.
-- `VITE_API_BASE_URL` peut etre `148.230.125.221:3304`; le front ajoute automatiquement `http://` et `/api`.
+- `VITE_API_BASE_URL` doit etre `http://148.230.125.221:3304` pour appeler le backend direct en HTTP.
 - Les images upload sont servies par `https://api.votre-domaine.com/uploads/...`.
 - MySQL sur Hostinger VPS utilise souvent `DB_PORT=3306`, pas `3307`.
 - Le port `3304` est seulement interne backend; Nginx expose en public sur `80/443`.
@@ -191,4 +193,90 @@ Important: au premier lancement, le script cree `.env` sur le VPS depuis `deploy
 ssh root@148.230.125.221
 nano /var/www/menu-paradise-api/.env
 pm2 restart menu-paradise-api --update-env
+```
+
+## 8. Forcer HTTPS pour le backend
+
+Le backend Express ne doit pas recevoir HTTPS directement sur `3304`. Il reste en local:
+
+```text
+http://127.0.0.1:3304
+```
+
+Nginx expose l'API en HTTPS:
+
+```text
+https://api.votre-domaine.com/api
+```
+
+Sur le VPS, creer une config Nginx:
+
+```bash
+sudo nano /etc/nginx/sites-available/menuassabah-api
+```
+
+Exemple:
+
+```nginx
+server {
+    listen 80;
+    server_name api.votre-domaine.com;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:3304/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /uploads/ {
+        proxy_pass http://127.0.0.1:3304/uploads/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+Activer:
+
+```bash
+sudo ln -sf /etc/nginx/sites-available/menuassabah-api /etc/nginx/sites-enabled/menuassabah-api
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+Installer SSL:
+
+```bash
+sudo apt install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d api.votre-domaine.com
+```
+
+Modifier `.env` backend:
+
+```bash
+nano ~/menuassabah/.env
+```
+
+Mettre:
+
+```env
+API_BASE_URL=https://api.votre-domaine.com
+CLIENT_ORIGIN=https://akdigital.ma
+```
+
+Puis:
+
+```bash
+pm2 restart menu-paradise-api --update-env
+curl https://api.votre-domaine.com/api/health
+```
+
+Build front avec l'API HTTPS:
+
+```bat
+deploy\build-front-dist-https-api.bat https://api.votre-domaine.com
 ```
