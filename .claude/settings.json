@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vite *)",
+      "Bash(node -e \"import\\('./server/src/db.js'\\).then\\(m => m.pool.query\\('SELECT 1'\\).then\\(\\(\\) => console.log\\('DB OK'\\)\\).catch\\(e => console.error\\('DB ERROR:', e.message\\)\\)\\)\")"
+    ]
+  }
+}
