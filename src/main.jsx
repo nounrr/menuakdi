@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import axios from 'axios';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -169,10 +169,9 @@ function PublicMenu({ data }) {
     loadDishes = () => Promise.resolve()
   } = data ?? {};
   const [categoryId, setCategoryId] = useState('');
-  const [subcategoryId, setSubcategoryId] = useState('');
   const [q, setQ] = useState('');
   const [page, setPage] = useState(1);
-  const [language, setLanguage] = useState('fr');
+  const [language, setLanguage] = useState('ar');
   const isArabic = language === 'ar';
   const text = {
     title: isArabic ? 'قائمة الطعام' : 'Recommended',
@@ -203,21 +202,15 @@ function PublicMenu({ data }) {
     return isArabic ? `${amount} درهم` : `${amount} Dhs`;
   };
 
-  const subcategories = useMemo(
-    () => meta.subcategories.filter((item) => !categoryId || item.category_id === Number(categoryId)),
-    [meta.subcategories, categoryId]
-  );
-
   useEffect(() => {
     if (!categoryId && meta.categories.length > 0) {
       setCategoryId(String(meta.categories[0].id));
-      setSubcategoryId('');
     }
   }, [categoryId, meta.categories]);
 
   useEffect(() => {
     setPage(1);
-  }, [categoryId, subcategoryId, q]);
+  }, [categoryId, q]);
 
   useEffect(() => {
     if (page !== dishPagination.page) {
@@ -227,10 +220,10 @@ function PublicMenu({ data }) {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      loadDishes({ categoryId, subcategoryId, q, page, limit: PAGE_SIZE });
+      loadDishes({ categoryId, q, page, limit: PAGE_SIZE });
     }, 180);
     return () => clearTimeout(timer);
-  }, [categoryId, subcategoryId, q, page]);
+  }, [categoryId, q, page]);
 
   return (
     <main className="menuShell appMenuShell">
@@ -267,29 +260,12 @@ function PublicMenu({ data }) {
               <SlidersHorizontal size={16} />
               <select
                 value={categoryId}
-                onChange={(event) => {
-                  setCategoryId(event.target.value);
-                  setSubcategoryId('');
-                }}
+                onChange={(event) => setCategoryId(event.target.value)}
               >
                 <option value="">{text.all}</option>
                 {meta.categories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {field(category, 'name')}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="selectBox subSelect">
-              <select
-                value={subcategoryId}
-                onChange={(event) => setSubcategoryId(event.target.value)}
-                disabled={subcategories.length === 0}
-              >
-                <option value="">{text.subcategories}</option>
-                {subcategories.map((subcategory) => (
-                  <option key={subcategory.id} value={subcategory.id}>
-                    {field(subcategory, 'name')}
                   </option>
                 ))}
               </select>
@@ -303,7 +279,7 @@ function PublicMenu({ data }) {
 
         <AnimatePresence mode="wait">
           <motion.section
-            key={`${categoryId}-${subcategoryId}-${q}-${language}-${loading}-${page}`}
+            key={`${categoryId}-${q}-${language}-${loading}-${page}`}
             className="dishGrid"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
